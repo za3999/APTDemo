@@ -1,1 +1,1 @@
-include ':app', ':process_lib'
+include ':app', ':process_lib', ':process_tool'

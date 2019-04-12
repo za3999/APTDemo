@@ -6,7 +6,7 @@ import android.view.View;
 import android.widget.TextView;
 import com.example.process_lib.annotaion.BindView;
 import com.example.process_lib.annotaion.TestAnnotation;
-import com.example.process_lib.util.AptTool;
+import com.example.process_tool.AptTool;
 
 @TestAnnotation
 public class MainActivity extends AppCompatActivity {
@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
         mTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AptTool.test();
+                AptTool.showToast(getApplicationContext(), "哈哈");
             }
         });
     }

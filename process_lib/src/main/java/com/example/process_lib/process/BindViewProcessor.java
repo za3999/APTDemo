@@ -18,14 +18,6 @@ import java.util.*;
 @AutoService(Processor.class)
 public class BindViewProcessor extends BaseAbstractProcessor {
 
-    private Elements mElementUtils;
-
-    @Override
-    public synchronized void init(ProcessingEnvironment processingEnv) {
-        super.init(processingEnv);
-        mElementUtils = processingEnv.getElementUtils();
-    }
-
     @Override
     public Set<String> getSupportedAnnotationTypes() {
         HashSet<String> supportTypes = new LinkedHashSet<>();
