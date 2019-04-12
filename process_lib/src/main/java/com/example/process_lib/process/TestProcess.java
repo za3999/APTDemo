@@ -2,13 +2,16 @@ package com.example.process_lib.process;
 
 import com.example.process_lib.annotaion.TestAnnotation;
 import com.google.auto.service.AutoService;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeSpec;
 
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.tools.JavaFileObject;
 import java.io.IOException;
-import java.io.Writer;
 import java.util.Collections;
 import java.util.Set;
 
@@ -24,35 +27,31 @@ public class TestProcess extends BaseAbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("package ").append(packageName).append(";\n\n");
-        builder.append("import android.widget.Toast;\n");
-        builder.append("import android.content.Context;\n");
-        builder.append('\n');
-        builder.append("public class ").append(className);
-        builder.append(" {\n");
-        generateMethods(builder);
-        builder.append('\n');
-        builder.append("}\n");
-        createJavaFile(className + "." + className, builder.toString());
-        return true;
+        return createJavaFile();
     }
 
-    private void generateMethods(StringBuilder builder) {
-        builder.append("public static void showToast(Context context,String string) {\n");
-        builder.append(" Toast.makeText(context,string,Toast.LENGTH_LONG).show();");
-        builder.append("  }\n");
-    }
+    private boolean createJavaFile() {
+        MethodSpec showToast = MethodSpec.methodBuilder("showToast")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .returns(void.class)
+                .addParameter(ClassName.bestGuess("android.content.Context"), "context")
+                .addParameter(String.class, "string")
+                .addStatement("$T.makeText(context,string,Toast.LENGTH_LONG).show()", ClassName.bestGuess("android.widget.Toast"))
+                .build();
 
-    private void createJavaFile(String className, String javaCode) {
+        TypeSpec ToastUtil = TypeSpec.classBuilder(className)
+                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                .addMethod(showToast)
+                .build();
+
+        JavaFile javaFile = JavaFile.builder(packageName, ToastUtil)
+                .build();
         try {
-            JavaFileObject jfo = processingEnv.getFiler().createSourceFile(className, null);
-            Writer writer = jfo.openWriter();
-            writer.write(javaCode);
-            writer.flush();
-            writer.close();
+            javaFile.writeTo(processingEnv.getFiler());
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
     }
 }
