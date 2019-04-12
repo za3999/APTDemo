@@ -16,7 +16,7 @@ import java.util.Collections;
 import java.util.Set;
 
 @AutoService(Processor.class)
-public class TestProcess extends AbstractProcessor {
+public class TestProcess extends BaseAbstractProcessor {
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {

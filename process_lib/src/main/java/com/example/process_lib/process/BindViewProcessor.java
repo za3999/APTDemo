@@ -16,16 +16,13 @@ import java.io.Writer;
 import java.util.*;
 
 @AutoService(Processor.class)
-public class BindViewProcessor extends AbstractProcessor {
+public class BindViewProcessor extends BaseAbstractProcessor {
 
-    private Messager mMessager;
     private Elements mElementUtils;
-    private Map<String, ClassCreatorProxy> mProxyMap = new HashMap<>();
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-        mMessager = processingEnv.getMessager();
         mElementUtils = processingEnv.getElementUtils();
     }
 
@@ -38,36 +35,33 @@ public class BindViewProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
-        mProxyMap.clear();
+        Map<String, ClassCreatorProxy> mProxyMap = new HashMap<>();
         Set<? extends Element> elements = roundEnvironment.getElementsAnnotatedWith(BindView.class);
         for (Element element : elements) {
             VariableElement variableElement = (VariableElement) element;
             TypeElement classElement = (TypeElement) variableElement.getEnclosingElement();
             String fullClassName = classElement.getQualifiedName().toString();
+            BindView bindAnnotation = variableElement.getAnnotation(BindView.class);
+            int id = bindAnnotation.value();
             ClassCreatorProxy proxy = mProxyMap.get(fullClassName);
             if (proxy == null) {
                 proxy = new ClassCreatorProxy(mElementUtils, classElement);
                 mProxyMap.put(fullClassName, proxy);
             }
-            BindView bindAnnotation = variableElement.getAnnotation(BindView.class);
-            int id = bindAnnotation.value();
             proxy.putElement(id, variableElement);
         }
         for (String key : mProxyMap.keySet()) {
             ClassCreatorProxy proxyInfo = mProxyMap.get(key);
             try {
-                mMessager.printMessage(Diagnostic.Kind.NOTE, " --> create " + proxyInfo.getProxyClassFullName());
                 JavaFileObject jfo = processingEnv.getFiler().createSourceFile(proxyInfo.getProxyClassFullName(), proxyInfo.getTypeElement());
                 Writer writer = jfo.openWriter();
                 writer.write(proxyInfo.generateJavaCode());
                 writer.flush();
                 writer.close();
             } catch (IOException e) {
-                mMessager.printMessage(Diagnostic.Kind.NOTE, " --> create " + proxyInfo.getProxyClassFullName() + "error");
+                e.printStackTrace();
             }
         }
-
-        mMessager.printMessage(Diagnostic.Kind.NOTE, "process finish ...");
         return true;
     }
 }
