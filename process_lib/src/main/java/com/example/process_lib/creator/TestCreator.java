@@ -1,5 +1,6 @@
 package com.example.process_lib.creator;
 
+import com.example.process_lib.base.BaseClassCreator;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
