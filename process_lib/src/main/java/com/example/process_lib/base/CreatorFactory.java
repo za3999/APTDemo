@@ -1,4 +1,7 @@
-package com.example.process_lib.creator;
+package com.example.process_lib.base;
+
+import com.example.process_lib.base.BindViewCreator;
+import com.example.process_lib.creator.TestCreator;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;

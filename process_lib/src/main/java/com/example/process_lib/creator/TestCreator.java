@@ -7,9 +7,8 @@ import com.squareup.javapoet.TypeSpec;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
-import java.io.IOException;
 
-public class TestCreator extends BaseClassCreator{
+public class TestCreator extends BaseClassCreator {
 
     public TestCreator(ProcessingEnvironment mProcessingEnv) {
         super(mProcessingEnv);
@@ -23,7 +22,7 @@ public class TestCreator extends BaseClassCreator{
     }
 
     @Override
-    public boolean createJavaFile() {
+    public JavaFile createJavaFile() {
         MethodSpec showToast = MethodSpec.methodBuilder("showToast")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(void.class)
@@ -37,14 +36,6 @@ public class TestCreator extends BaseClassCreator{
                 .addMethod(showToast)
                 .build();
 
-        JavaFile javaFile = JavaFile.builder(mPackageName, classSpec)
-                .build();
-        try {
-            javaFile.writeTo(mProcessingEnv.getFiler());
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
+        return JavaFile.builder(mPackageName, classSpec).build();
     }
 }

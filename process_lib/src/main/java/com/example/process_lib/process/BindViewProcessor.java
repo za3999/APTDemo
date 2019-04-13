@@ -1,9 +1,10 @@
 package com.example.process_lib.process;
 
 import com.example.process_lib.annotaion.BindView;
+import com.example.process_lib.base.BaseAbstractProcessor;
 import com.example.process_lib.creator.BaseClassCreator;
-import com.example.process_lib.creator.BindViewCreator;
-import com.example.process_lib.creator.CreatorFactory;
+import com.example.process_lib.base.BindViewCreator;
+import com.example.process_lib.base.CreatorFactory;
 import com.google.auto.service.AutoService;
 
 import javax.annotation.processing.Processor;
@@ -42,7 +43,7 @@ public class BindViewProcessor extends BaseAbstractProcessor {
         }
         for (String key : mProxyMap.keySet()) {
             BaseClassCreator classCreator = mProxyMap.get(key);
-            classCreator.createJavaFile();
+            classCreator.create();
         }
         return true;
     }

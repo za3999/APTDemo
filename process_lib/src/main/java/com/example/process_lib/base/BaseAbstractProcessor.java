@@ -1,4 +1,4 @@
-package com.example.process_lib.process;
+package com.example.process_lib.base;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;

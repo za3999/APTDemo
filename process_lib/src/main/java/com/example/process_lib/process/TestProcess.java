@@ -1,7 +1,8 @@
 package com.example.process_lib.process;
 
 import com.example.process_lib.annotaion.TestAnnotation;
-import com.example.process_lib.creator.CreatorFactory;
+import com.example.process_lib.base.BaseAbstractProcessor;
+import com.example.process_lib.base.CreatorFactory;
 import com.google.auto.service.AutoService;
 
 import javax.annotation.processing.Processor;
@@ -20,7 +21,7 @@ public class TestProcess extends BaseAbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        return CreatorFactory.getTestCreator(processingEnv).createJavaFile();
+        return CreatorFactory.getTestCreator(processingEnv).create();
     }
 
 }
