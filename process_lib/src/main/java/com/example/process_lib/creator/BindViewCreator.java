@@ -1,29 +1,53 @@
-package com.example.process_lib.util;
+package com.example.process_lib.creator;
 
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.Elements;
+import javax.tools.JavaFileObject;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ClassCreatorProxy {
-    private String mBindingClassName;
-    private String mPackageName;
-    private TypeElement mTypeElement;
-    private Map<Integer, VariableElement> mVariableElementMap = new HashMap<>();
+public class BindViewCreator extends BaseClassCreator {
 
-    public ClassCreatorProxy(Elements elementUtils, TypeElement classElement) {
-        this.mTypeElement = classElement;
-        PackageElement packageElement = elementUtils.getPackageOf(mTypeElement);
+    protected Map<Integer, VariableElement> mVariableElementMap = new HashMap<>();
+    protected TypeElement mTypeElement;
+
+    public BindViewCreator(ProcessingEnvironment mProcessingEnv, TypeElement typeElement) {
+        super(mProcessingEnv);
+        this.mTypeElement = typeElement;
+    }
+
+    @Override
+    public BindViewCreator initClassMessage() {
+        PackageElement packageElement = mProcessingEnv.getElementUtils().getPackageOf(mTypeElement);
         String packageName = packageElement.getQualifiedName().toString();
         String className = mTypeElement.getSimpleName().toString();
-        this.mPackageName = packageName;
-        this.mBindingClassName = className + "_ViewBinding";
+        mPackageName = packageName;
+        mClassName = className + "_ViewBinding";
+        return this;
     }
 
     public void putElement(int id, VariableElement element) {
         mVariableElementMap.put(id, element);
+    }
+
+    @Override
+    public boolean createJavaFile() {
+        try {
+            JavaFileObject jfo = mProcessingEnv.getFiler().createSourceFile(getClassFullName(), mTypeElement);
+            Writer writer = jfo.openWriter();
+            writer.write(generateJavaCode());
+            writer.flush();
+            writer.close();
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     /**
@@ -36,7 +60,7 @@ public class ClassCreatorProxy {
         builder.append("package ").append(mPackageName).append(";\n\n");
         builder.append("import com.example.za399.aptdemo.*;\n");
         builder.append('\n');
-        builder.append("public class ").append(mBindingClassName);
+        builder.append("public class ").append(mClassName);
         builder.append(" {\n");
 
         generateMethods(builder);
@@ -60,13 +84,5 @@ public class ClassCreatorProxy {
             builder.append("(" + type + ")(((android.app.Activity)host).findViewById( " + id + "));\n");
         }
         builder.append("  }\n");
-    }
-
-    public String getProxyClassFullName() {
-        return mPackageName + "." + mBindingClassName;
-    }
-
-    public TypeElement getTypeElement() {
-        return mTypeElement;
     }
 }

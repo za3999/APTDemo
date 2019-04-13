@@ -1,18 +1,16 @@
 package com.example.process_lib.process;
 
 import com.example.process_lib.annotaion.BindView;
-import com.example.process_lib.util.ClassCreatorProxy;
+import com.example.process_lib.creator.BaseClassCreator;
+import com.example.process_lib.creator.BindViewCreator;
+import com.example.process_lib.creator.CreatorFactory;
 import com.google.auto.service.AutoService;
 
-import javax.annotation.processing.*;
+import javax.annotation.processing.Processor;
+import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
-import javax.lang.model.util.Elements;
-import javax.tools.Diagnostic;
-import javax.tools.JavaFileObject;
-import java.io.IOException;
-import java.io.Writer;
 import java.util.*;
 
 @AutoService(Processor.class)
@@ -27,7 +25,7 @@ public class BindViewProcessor extends BaseAbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
-        Map<String, ClassCreatorProxy> mProxyMap = new HashMap<>();
+        Map<String, BindViewCreator> mProxyMap = new HashMap<>();
         Set<? extends Element> elements = roundEnvironment.getElementsAnnotatedWith(BindView.class);
         for (Element element : elements) {
             VariableElement variableElement = (VariableElement) element;
@@ -35,24 +33,16 @@ public class BindViewProcessor extends BaseAbstractProcessor {
             String fullClassName = classElement.getQualifiedName().toString();
             BindView bindAnnotation = variableElement.getAnnotation(BindView.class);
             int id = bindAnnotation.value();
-            ClassCreatorProxy proxy = mProxyMap.get(fullClassName);
-            if (proxy == null) {
-                proxy = new ClassCreatorProxy(mElementUtils, classElement);
-                mProxyMap.put(fullClassName, proxy);
+            BindViewCreator classCreator = mProxyMap.get(fullClassName);
+            if (classCreator == null) {
+                classCreator = CreatorFactory.getBindViewCreator(processingEnv, classElement);
+                mProxyMap.put(fullClassName, classCreator);
             }
-            proxy.putElement(id, variableElement);
+            classCreator.putElement(id, variableElement);
         }
         for (String key : mProxyMap.keySet()) {
-            ClassCreatorProxy proxyInfo = mProxyMap.get(key);
-            try {
-                JavaFileObject jfo = processingEnv.getFiler().createSourceFile(proxyInfo.getProxyClassFullName(), proxyInfo.getTypeElement());
-                Writer writer = jfo.openWriter();
-                writer.write(proxyInfo.generateJavaCode());
-                writer.flush();
-                writer.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            BaseClassCreator classCreator = mProxyMap.get(key);
+            classCreator.createJavaFile();
         }
         return true;
     }
