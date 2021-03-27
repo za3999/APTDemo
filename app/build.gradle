@@ -4,12 +4,19 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.example.za399.aptdemo"
-        minSdkVersion 22
+        minSdkVersion 26
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [moduleName: project.getName(), packageNameForAPT: "packageNameForAPT"]
+            }
+        }
     }
+
     buildTypes {
         release {
             minifyEnabled false
